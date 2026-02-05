@@ -87,7 +87,7 @@ export default function Contact() {
             {/* Contact Cards */}
             {[
               { icon: Mail, title: "Email Us", text: "easystore@gsh.com" },
-              { icon: Phone, title: "Call Us", text: "+91 6303125585" },
+              { icon: Phone, title: "Call Us", text: "+91 93924 04394" },
               { icon: MapPin, title: "Visit Us", text: "Hyderabad, Telangana, India" }
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-4 md:gap-5 group">
@@ -211,7 +211,7 @@ export default function Contact() {
 
       {/* --- FLOATING CHAT BUTTON --- */}
       <a
-        href="https://wa.me/916303125585"
+        href="https://wa.me/9392404394"
         target="_blank"
         rel="noreferrer"
         // ✅ CHANGED: Moved 'bottom-6' to 'bottom-24' for Mobile to avoid overlap with navbars/content
