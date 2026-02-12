@@ -45,8 +45,8 @@ const Footer = () => {
             {[
               { icon: <FaFacebookF />, link: "https://www.facebook.com/" },
               { icon: <FaTwitter />, link: "https://x.com/" },
-              { icon: <FaInstagram />, link: "https://gsh-personal.vercel.app/" },
-              { icon: <FaLinkedinIn />, link: "https://www.linkedin.com/in/srihari-gudipati-0410a925a/" },
+              { icon: <FaInstagram />, link: "https://www.instagram.com/i._.surya/" },
+              { icon: <FaLinkedinIn />, link: "https://www.linkedin.com/in/surya-kiran-kumar-padarthi-75a798314/" },
             ].map((s, i) => (
               <a
                 key={i}
