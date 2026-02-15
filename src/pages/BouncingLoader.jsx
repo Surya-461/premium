@@ -83,7 +83,7 @@ const GSHStoreLoader = () => {
 
       {/* Text Container */}
       <div className="text-purple-200 font-medium tracking-wider text-sm sm:text-base relative">
-        Loading GSH Store
+        Loading KK Store
         {/* The span that handles the animated dots */}
         <span className="loading-dots absolute ml-1"></span>
       </div>

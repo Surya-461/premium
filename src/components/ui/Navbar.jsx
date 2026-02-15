@@ -327,7 +327,7 @@ const Navbar = () => {
           <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-bold tracking-tighter text-white group-hover:text-blue-400 transition-colors whitespace-nowrap">
-                GSH<span className="text-blue-500">.</span>STORE
+                KK<span className="text-blue-500"> </span>STORE
               </span>
               <span className="text-[8px] md:text-[10px] tracking-widest text-slate-400 uppercase -mt-1 hidden sm:block">Premium Collection</span>
             </div>

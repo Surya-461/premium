@@ -202,6 +202,7 @@ const Cart = () => {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                         <h5 className="text-sm sm:text-lg font-bold text-white leading-tight line-clamp-2">{item.product_name}</h5>
+                        <p className="text-[10px] sm:text-xs text-slate-500 font-mono mt-1">ID: {item.product_id}</p>
                           <button 
                            onClick={() => handleRemove(item.product_id)}
                            className="text-slate-500 hover:text-red-400 transition-colors p-1"

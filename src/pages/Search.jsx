@@ -146,6 +146,9 @@ const Search = () => {
                       <h3 className="text-sm sm:text-base font-bold text-white leading-tight line-clamp-2 min-h-[2.5rem] group-hover:text-blue-400 transition-colors">
                           {p.product_name}
                       </h3>
+                    <p className="inline-block mt-1 text-[9px] sm:text-[11px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-mono">
+                      ID: {p.product_id}
+                    </p>
                   </div>
 
                   {/* Price & Rating */}
