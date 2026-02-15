@@ -58,7 +58,12 @@ const Search = () => {
       return;
     }
     const result = products.filter((product) =>
-      [product.product_name, product.product_brand, product.product_category].some((field) =>
+      product.product_id?.toString() === query ||
+      [
+        product.product_name,
+        product.product_brand,
+        product.product_category,
+      ].some((field) =>
         field?.toLowerCase().includes(query.toLowerCase())
       )
     );
