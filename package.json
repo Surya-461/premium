@@ -18,7 +18,7 @@
     "cors": "^2.8.5",
     "dotevn": "^0.0.1-security",
     "emailjs-com": "^3.2.0",
-    "firebase": "^12.8.0",
+    "firebase": "^12.9.0",
     "firebase-admin": "^13.6.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
