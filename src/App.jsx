@@ -27,6 +27,7 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 // Dashboards
 const AdminDashboard = lazy(() => import("./dashboards/AdminDashboard"));
 const UserDashboard = lazy(() => import("./dashboards/UserDashboard"));
+import Dashboard from './components/Dashboard';
 // --- NEW IMPORT ---
 const SuperAdminDashboard = lazy(() => import("./dashboards/SuperAdminDashboard")); 
 
@@ -79,6 +80,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/search" element={<Search />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           
           {/* --- Checkout Routes --- */}
           <Route path="/shipping" element={<Shipping />} />

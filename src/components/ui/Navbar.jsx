@@ -236,7 +236,7 @@ const Navbar = () => {
             setCurrentUser({ ...user, ...data });
             setProfileImage(data.profileImage);
             setIsAdmin(true); 
-            if(user.email === "gudipatisrihari6@gmail.com") setIsSuperAdmin(true);
+            if(user.email === "padarthikirankumar8@gmail.com") setIsSuperAdmin(true);
           } else {
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
@@ -346,6 +346,11 @@ const Navbar = () => {
             <Link to="/" className={getDesktopClass("/")}>Home</Link>
             <Link to="/about" className={getDesktopClass("/about")}>About</Link>
             <Link to="/contact" className={getDesktopClass("/contact")}>Contact</Link>
+              {(isAdmin || isSuperAdmin) && (
+                <Link to="/dashboard" className={getDesktopClass("/dashboard")}>
+                  Sales and Revenue
+                </Link>
+              )}
           </div>
 
           {/* ICONS (Cart, Profile, Notification) */}
@@ -470,6 +475,15 @@ const Navbar = () => {
         <FaPhone size={20} />
         <span className="text-[10px] font-medium">Contact</span>
       </Link>
+        {(isAdmin || isSuperAdmin) && (
+          <Link
+            to="/dashboard"
+            className={`flex flex-col items-center gap-1 w-16 ${isActive('/dashboard') ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            <FaUser size={20} />
+            <span className="text-[10px] font-medium">Sales & Revenue</span>
+          </Link>
+        )}
     </div>
     </>
   );
