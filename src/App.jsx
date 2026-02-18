@@ -28,6 +28,7 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const AdminDashboard = lazy(() => import("./dashboards/AdminDashboard"));
 const UserDashboard = lazy(() => import("./dashboards/UserDashboard"));
 import FinancialInsights from './components/FinancialInsights.jsx';
+import CustomerSegmentation from './components/CustomerSegmentation.jsx';
 // --- NEW IMPORT ---
 const SuperAdminDashboard = lazy(() => import("./dashboards/SuperAdminDashboard")); 
 
@@ -89,6 +90,7 @@ function App() {
 
           {/* --- Dashboard Routes --- */}
           <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/customer-segmentation" element={<CustomerSegmentation />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
           <Route path="/superadmindashboard" element={<SuperAdminDashboard />} /> 
           

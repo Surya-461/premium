@@ -45,7 +45,7 @@ const NavbarNotifications = ({ user, isAdmin, isSuperAdmin, onUpdateData }) => {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const filteredNotes = (isAdmin || isSuperAdmin) ? notes : notes.filter(n => n.type !== 'admin');
+      const filteredNotes = (isAdmin && !isSuperAdmin) ? notes : notes.filter(n => n.type !== 'admin');
       filteredNotes.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       setNotifications(filteredNotes);
     });
@@ -130,7 +130,7 @@ const NavbarNotifications = ({ user, isAdmin, isSuperAdmin, onUpdateData }) => {
       {isOpen && (
         <div className="absolute top-14 right-[-65px] sm:right-0 w-[94vw] sm:w-[380px] bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[60] overflow-hidden animate-fade-in-up ring-1 ring-white/10 origin-top-right">
           <div className="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-950/50">
-            <h4 className="font-bold text-white text-sm tracking-wide">{(isAdmin || isSuperAdmin) ? 'Admin Alerts' : 'Notifications'}</h4>
+            <h4 className="font-bold text-white text-sm tracking-wide">{(isAdmin && !isSuperAdmin) ? 'Admin Alerts' : 'Notifications'}</h4>
             <div className="flex items-center gap-3">
               {notifications.length > 0 && (
                 <button onClick={clearAllNotifications} className="text-slate-400 hover:text-rose-500 transition-colors p-1" title="Clear All">
@@ -224,36 +224,53 @@ const Navbar = () => {
       if (user) {
         setIsAuth(true);
         localStorage.setItem("isAuthenticated", "true");
+
         const savedCart = localStorage.getItem(`cart_${user.uid}`);
         if (savedCart) dispatch(setCart(JSON.parse(savedCart)));
-        else dispatch(clearCart()); 
+        else dispatch(clearCart());
 
         try {
           const adminRef = doc(db, "adminDetails", user.uid);
           const adminSnap = await getDoc(adminRef);
+
           if (adminSnap.exists()) {
             const data = adminSnap.data();
             setCurrentUser({ ...user, ...data });
             setProfileImage(data.profileImage);
-            setIsAdmin(true); 
-            if(user.email === "padarthikirankumar8@gmail.com") setIsSuperAdmin(true);
+            setIsAdmin(true);
+
+            // ✅ SUPER ADMIN CHECK
+            if (user.email === "padarthikirankumar8@gmail.com") {
+              setIsSuperAdmin(true);
+
+              // 🚀 REDIRECT TO SUPER ADMIN DASHBOARD
+              navigate("/superadmindashboard");
+            } else {
+              navigate("/admindashboard");
+            }
+
           } else {
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
+
             if (userSnap.exists()) {
               const data = userSnap.data();
               setCurrentUser({ ...user, ...data });
               setProfileImage(data.profileImage);
               setIsAdmin(false);
               setIsSuperAdmin(false);
+
+              // 🚀 NORMAL USER REDIRECT
+              navigate("/userdashboard");
             } else {
               setCurrentUser(user);
             }
           }
-        } catch (error) { 
+        } catch (error) {
           console.error("Error fetching profile:", error);
-          setCurrentUser(user); 
+          setCurrentUser(user);
         }
+
       } else {
         setIsAuth(false);
         setCurrentUser(null);
@@ -263,8 +280,7 @@ const Navbar = () => {
         setIsSuperAdmin(false);
         dispatch(clearCart());
       }
-    });
-    return () => unsubscribe();
+    });return () => unsubscribe();
   }, [dispatch]);
 
   useEffect(() => {
@@ -346,7 +362,7 @@ const Navbar = () => {
             <Link to="/" className={getDesktopClass("/")}>Home</Link>
             <Link to="/about" className={getDesktopClass("/about")}>About</Link>
             <Link to="/contact" className={getDesktopClass("/contact")}>Contact</Link>
-              {(isAdmin || isSuperAdmin) && (
+              {(isAdmin && !isSuperAdmin) && (
                 <Link to="/financial-insights" className={getDesktopClass("/financial-insights")}>
                   Financial Insights
                 </Link>
@@ -475,7 +491,7 @@ const Navbar = () => {
         <FaPhone size={20} />
         <span className="text-[10px] font-medium">Contact</span>
       </Link>
-        {(isAdmin || isSuperAdmin) && (
+        {(isAdmin && !isSuperAdmin) && (
           <Link
             to="/financial-insights"
             className={`flex flex-col items-center gap-1 w-16 ${isActive('/financial-insights') ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}

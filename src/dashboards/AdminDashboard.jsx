@@ -25,6 +25,7 @@ import AdminOrders from './AdminOrders';
 import AdminProducts from './AdminProducts';
 import AdminCustomers from './AdminCustomers';
 import AdminAnalytics from './AdminAnalytics';
+import CustomerSegmentation from "../components/CustomerSegmentation.jsx";
 import AdminReports from './AdminReports';
 import AdminSettings from './AdminSettings';
 
@@ -774,6 +775,7 @@ const AdminDashboard = () => {
             {activeSection === 'customers' && <AdminCustomers initialCustomers={customers} orders={orders} onUpdate={fetchAllData} />}
             {/* {activeSection === 'analytics' && <AdminAnalytics orders={filteredOrders} />} */}
             {/* {activeSection === 'segmentation' && <AdminSegmentation customers={customers} orders={orders} />} */}
+            {activeSection === 'segmentation' && <CustomerSegmentation customers={customers} orders={orders} />}
             {activeSection === 'reports' && <AdminReports orders={filteredOrders} products={products} customers={customers} />}
             {activeSection === 'settings' && <AdminSettings />}
 

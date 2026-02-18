@@ -11,9 +11,17 @@ function ControlPanel({ onRevenue, onSales }) {
                 </label>
                 <input
                     type="number"
-                    value={steps}
+                    value={steps === 0 ? "" : steps}
                     min="1"
-                    onChange={(e) => setSteps(Number(e.target.value))}
+                    onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "") {
+                            setSteps(0);   // allow clearing
+                        } else {
+                            setSteps(Number(value));
+                        }
+                    }}
                     className="ml-3 px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 w-24"
                 />
             </div>
