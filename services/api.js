@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: "https://backend-e011.onrender.com",
 });
 
 export const getRevenueForecast = (steps) =>
@@ -18,7 +18,7 @@ export const getSegmentation = (income, spending) =>
 // ==============================
 export const predictCustomerSegment = async (customerData) => {
     const response = await axios.post(
-        `http://127.0.0.1:8000/predict/customer-segment`,
+        `${API.defaults.baseURL}/predict/customer-segment`,
         customerData
     );
     return response.data;
