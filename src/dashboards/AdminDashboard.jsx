@@ -6,7 +6,7 @@ import {
 } from 'chart.js';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, Settings, FileText,
-  BarChart2, User, Camera, Loader, Calendar, Ticket, MapPin, 
+  BarChart2, User, Camera, Loader, Calendar, Ticket, MapPin,PieChart, 
   Trophy, TrendingUp, AlertTriangle, Search, Crown, X // Removed Menu icon
 } from 'lucide-react';
 import { auth, db } from "../firebase";
@@ -473,7 +473,18 @@ const AdminDashboard = () => {
   const months = [{ value: '01', label: 'January' }, { value: '02', label: 'February' }, { value: '03', label: 'March' }, { value: '04', label: 'April' }, { value: '05', label: 'May' }, { value: '06', label: 'June' }, { value: '07', label: 'July' }, { value: '08', label: 'August' }, { value: '09', label: 'September' }, { value: '10', label: 'October' }, { value: '11', label: 'November' }, { value: '12', label: 'December' }];
   const weeks = [1, 2, 3, 4];
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const navItems = [{ id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' }, { id: 'orders', icon: ShoppingBag, label: 'Orders' }, { id: 'products', icon: Package, label: 'Products' }, { id: 'customers', icon: Users, label: 'Customers' }, { id: 'analytics', icon: BarChart2, label: 'Analytics' }, { id: 'reports', icon: FileText, label: 'Reports' }, { id: 'coupons', icon: Ticket, label: 'Coupons' }, { id: 'settings', icon: Settings, label: 'Settings' }];
+  const navItems = [
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'orders', icon: ShoppingBag, label: 'Orders' },
+    { id: 'products', icon: Package, label: 'Products' },
+    { id: 'customers', icon: Users, label: 'Customers' },
+    // ✅ NEW ITEM ADDED HERE
+    { id: 'segmentation', icon: PieChart, label: 'Customer Intelligence' },
+    { id: 'reports', icon: FileText, label: 'Reports' },
+    { id: 'coupons', icon: Ticket, label: 'Coupons' },
+    { id: 'settings', icon: Settings, label: 'Settings' }
+  ];
+  // const navItems = [{ id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' }, { id: 'orders', icon: ShoppingBag, label: 'Orders' }, { id: 'products', icon: Package, label: 'Products' }, { id: 'customers', icon: Users, label: 'Customers' }, { id: 'analytics', icon: BarChart2, label: 'Analytics' }, { id: 'reports', icon: FileText, label: 'Reports' }, { id: 'coupons', icon: Ticket, label: 'Coupons' }, { id: 'settings', icon: Settings, label: 'Settings' }];
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] w-full font-sans text-slate-200 bg-[#0f172a] selection:bg-cyan-500/30 relative">
@@ -761,7 +772,8 @@ const AdminDashboard = () => {
             {activeSection === 'products' && <AdminProducts initialProducts={products} orders={orders} orderItems={initialOrderItems} payments={initialPayments} onUpdate={fetchAllData} />}
             {activeSection === 'orders' && <AdminOrders initialOrders={orders} onUpdate={fetchAllData} onStatusChange={handleOrderStatusUpdate} />}
             {activeSection === 'customers' && <AdminCustomers initialCustomers={customers} orders={orders} onUpdate={fetchAllData} />}
-            {activeSection === 'analytics' && <AdminAnalytics orders={filteredOrders} />}
+            {/* {activeSection === 'analytics' && <AdminAnalytics orders={filteredOrders} />} */}
+            {/* {activeSection === 'segmentation' && <AdminSegmentation customers={customers} orders={orders} />} */}
             {activeSection === 'reports' && <AdminReports orders={filteredOrders} products={products} customers={customers} />}
             {activeSection === 'settings' && <AdminSettings />}
 

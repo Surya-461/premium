@@ -1,37 +1,38 @@
 import { useState } from "react";
 
 function ControlPanel({ onRevenue, onSales }) {
-    const [steps, setSteps] = useState(30);
+    const [steps, setSteps] = useState(6);
 
     return (
-        <div className="flex flex-col md:flex-row items-center gap-6">
-
-            <div className="flex flex-col w-full md:w-1/4">
-                <label className="text-gray-600 text-sm mb-1">
-                    Forecast Days
+        <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
+            <div>
+                <label className="text-slate-300 text-sm">
+                    Forecast Periods:
                 </label>
                 <input
                     type="number"
                     value={steps}
                     min="1"
-                    onChange={(e) => setSteps(e.target.value)}
-                    className="border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    onChange={(e) => setSteps(Number(e.target.value))}
+                    className="ml-3 px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 w-24"
                 />
             </div>
 
-            <button
-                onClick={() => onRevenue(steps)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105"
-            >
-                💰 Revenue Forecast
-            </button>
+            <div className="flex gap-4">
+                <button
+                    onClick={() => onRevenue(steps)}
+                    className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
+                >
+                    Revenue Forecast
+                </button>
 
-            <button
-                onClick={() => onSales(steps)}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105"
-            >
-                📦 Sales Forecast
-            </button>
+                <button
+                    onClick={() => onSales(steps)}
+                    className="px-5 py-2 rounded-xl bg-violet-500 hover:bg-violet-600 text-white font-semibold transition"
+                >
+                    Sales Forecast
+                </button>
+            </div>
         </div>
     );
 }

@@ -347,8 +347,8 @@ const Navbar = () => {
             <Link to="/about" className={getDesktopClass("/about")}>About</Link>
             <Link to="/contact" className={getDesktopClass("/contact")}>Contact</Link>
               {(isAdmin || isSuperAdmin) && (
-                <Link to="/dashboard" className={getDesktopClass("/dashboard")}>
-                  Sales and Revenue
+                <Link to="/financial-insights" className={getDesktopClass("/financial-insights")}>
+                  Financial Insights
                 </Link>
               )}
           </div>
@@ -477,11 +477,11 @@ const Navbar = () => {
       </Link>
         {(isAdmin || isSuperAdmin) && (
           <Link
-            to="/dashboard"
-            className={`flex flex-col items-center gap-1 w-16 ${isActive('/dashboard') ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+            to="/financial-insights"
+            className={`flex flex-col items-center gap-1 w-16 ${isActive('/financial-insights') ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <FaUser size={20} />
-            <span className="text-[10px] font-medium">Sales & Revenue</span>
+            <span className="text-[10px] font-medium">Financial Insights</span>
           </Link>
         )}
     </div>
