@@ -52,12 +52,12 @@ function FinancialInsights() {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-white">
+                    {/* <h1 className="text-3xl font-bold text-white">
                         Predictive Analytics Dashboard
-                    </h1>
-                    <p className="text-slate-400 mt-2">
+                    </h1> */}
+                    <h1 className="text-slate-400 mb-2 text-sm uppercase tracking-wide">
                         AI-powered Sales & Revenue Forecasting
-                    </p>
+                    </h1>
                 </div>
 
                 {/* Control Panel */}
