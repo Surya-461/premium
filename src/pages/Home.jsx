@@ -130,7 +130,7 @@ const Home = () => {
   const [timeLeft, setTimeLeft] = useState(0);
 
   // Lists
-  const departments = ["All", "Men", "Women", "Kids"];
+  const departments = ["All", "Men", "Women"];
   const shopCategories = [
     "Jeans", "Shorts", "Dresses", "Skirts", "Swim", "Socks", 
     "Maternity", "Suits", "Intimates", "Pants & Capris", 
