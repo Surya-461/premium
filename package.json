@@ -21,7 +21,7 @@
     "emailjs-com": "^3.2.0",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.0",
-    "framer-motion": "^12.23.26",
+    "framer-motion": "^12.34.3",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
