@@ -23,3 +23,11 @@ export const predictCustomerSegment = async (customerData) => {
     );
     return response.data;
 };
+
+// ==============================
+// 📋 GET ALL CUSTOMERS (NEW)
+// ==============================
+export const getCustomers = async () => {
+    const response = await API.get(`/customers`);
+    return response.data;
+};
