@@ -10,20 +10,24 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Legend, BarElement, ArcElement
 } from 'chart.js';
+import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, ArcElement);
 
 // --- COMPONENT: PRODUCT CARD ---
 const ProductCard = ({ product, onEdit, onDelete }) => {
-  // Safe calculation for display
+  const navigate = useNavigate();   // ✅ add this
+
   const price = Number(product.selling_unit_price) || 0;
   const cost = Number(product.cost_unit_price) || 0;
   const margin = price - cost;
   const marginPercent = price > 0 ? ((margin / price) * 100).toFixed(1) : 0;
 
   return (
-    <div className="group relative bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden shadow-lg hover:shadow-violet-500/10 hover:border-violet-500/30 transition-all duration-300 flex flex-col h-full">
-      
+    <div
+      onClick={() => navigate(`/product/${product.product_id}`)}   // ✅ navigation added
+      className="group relative bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden shadow-lg hover:shadow-violet-500/10 hover:border-violet-500/30 transition-all duration-300 flex flex-col h-full cursor-pointer"
+    >
       {/* Image Section */}
       <div className="relative w-full h-48 bg-black/40 overflow-hidden">
         {product.image_url ? (
@@ -93,15 +97,21 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
 
       {/* Actions (Hover Reveal) */}
       <div className="absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-[-10px] group-hover:translate-y-0">
-        <button 
-          onClick={() => onEdit(product)} 
+        <button
+          onClick={(e) => {
+            e.stopPropagation();   // ✅ prevents navigation
+            onEdit(product);
+          }}
           className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 shadow-lg shadow-blue-900/50 transition-colors"
           title="Edit"
         >
           <Edit size={16} />
         </button>
-        <button 
-          onClick={() => onDelete(product.product_id)} 
+        <button
+          onClick={(e) => {
+            e.stopPropagation();   // ✅ prevents navigation
+            onDelete(product.product_id);
+          }}
           className="p-2 bg-rose-600 text-white rounded-lg hover:bg-rose-500 shadow-lg shadow-rose-900/50 transition-colors"
           title="Delete"
         >

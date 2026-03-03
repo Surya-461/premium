@@ -18,7 +18,8 @@ import {
 import { products } from "../data/dataUtils";
 
 // --- COMPONENT: PRODUCT CARD (RESPONSIVE) ---
-const ProductCard = ({ product, isAdmin, onAddToCart, onBuyNow }) => {
+const ProductCard = ({ product, isAdmin, onAddToCart }) => {
+  const navigate = useNavigate();
   
   const getProductImage = (p) => {
     if (p.image_url) return p.image_url;
@@ -42,8 +43,10 @@ const ProductCard = ({ product, isAdmin, onAddToCart, onBuyNow }) => {
   );
 
   return (
-    <div className="group bg-slate-800 rounded-xl sm:rounded-2xl overflow-hidden hover:scale-105 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 flex flex-col h-full relative">
-      
+    <div
+      onClick={() => navigate(`/product/${product.product_id}`)}
+      className="group bg-slate-800 rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer hover:scale-105 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 flex flex-col h-full relative"
+    >
       {/* --- Image Section --- */}
       <div className="relative h-40 sm:h-64 overflow-hidden bg-slate-700">
         <img 
@@ -89,16 +92,22 @@ const ProductCard = ({ product, isAdmin, onAddToCart, onBuyNow }) => {
         {/* --- VISIBLE ACTION BUTTONS --- */}
         {!isAdmin ? (
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-2 pt-2 sm:pt-3 border-t border-slate-700/50">
-                <button 
-                    onClick={() => onAddToCart(product)}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product);
+              }}
                     className="flex items-center justify-center gap-1 sm:gap-2 bg-slate-700 hover:bg-slate-600 text-white text-[10px] sm:text-sm font-semibold py-2 sm:py-2.5 rounded-lg transition-all active:scale-95 border border-slate-600 hover:border-slate-500"
                 >
                     <FaShoppingCart className="text-blue-400 w-3 h-3 sm:w-3.5 sm:h-3.5"/> 
                     <span>Add</span>
                 </button>
                 
-                <button 
-                    onClick={() => onBuyNow(product)}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product);
+              }}
                     className="flex items-center justify-center gap-1 sm:gap-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] sm:text-sm font-bold py-2 sm:py-2.5 rounded-lg shadow-lg shadow-blue-900/20 transition-all active:scale-95"
                 >
                     <FaBolt className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> 

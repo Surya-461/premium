@@ -6,7 +6,6 @@ import { addItem } from "../slices/cartSlice";
 import { FaShoppingCart, FaBolt, FaStar } from "react-icons/fa";
 
 const ProductDetails = () => {
-
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -96,9 +95,9 @@ const ProductDetails = () => {
                     </p>
 
                     <p className="text-slate-300 mb-8 leading-relaxed">
-                        Experience premium craftsmanship with modern minimal aesthetics.
-                        Designed for everyday comfort and long-lasting durability.
-                        Perfect for fashion-forward individuals.
+                        Premium quality product crafted with attention to detail.
+                        Designed for comfort, durability, and modern style.
+                        A perfect addition to your wardrobe.
                     </p>
 
                     <div className="flex gap-4">
@@ -120,33 +119,35 @@ const ProductDetails = () => {
             </div>
 
             {/* SIMILAR PRODUCTS */}
-            <div className="max-w-6xl mx-auto mt-20">
-                <h2 className="text-2xl font-bold mb-8">
-                    Similar Products
-                </h2>
+            {similarProducts.length > 0 && (
+                <div className="max-w-6xl mx-auto mt-20">
+                    <h2 className="text-2xl font-bold mb-8">
+                        Similar Products
+                    </h2>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {similarProducts.map((p) => (
-                        <div
-                            key={p.product_id}
-                            onClick={() => navigate(`/product/${p.product_id}`)}
-                            className="bg-slate-800 p-4 rounded-2xl cursor-pointer hover:scale-105 transition"
-                        >
-                            <img
-                                src={p.image_url}
-                                alt={p.product_name}
-                                className="rounded-xl mb-3"
-                            />
-                            <h3 className="text-sm font-semibold">
-                                {p.product_name}
-                            </h3>
-                            <p className="text-blue-400 font-bold">
-                                ₹{p.selling_unit_price.toFixed(2)}
-                            </p>
-                        </div>
-                    ))}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {similarProducts.map((p) => (
+                            <div
+                                key={p.product_id}
+                                onClick={() => navigate(`/product/${p.product_id}`)}
+                                className="bg-slate-800 p-4 rounded-2xl cursor-pointer hover:scale-105 transition"
+                            >
+                                <img
+                                    src={p.image_url}
+                                    alt={p.product_name}
+                                    className="rounded-xl mb-3"
+                                />
+                                <h3 className="text-sm font-semibold">
+                                    {p.product_name}
+                                </h3>
+                                <p className="text-blue-400 font-bold">
+                                    ₹{p.selling_unit_price.toFixed(2)}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

@@ -23,6 +23,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Shipping = lazy(() => import("./pages/Shipping"));
 const Payment = lazy(() => import("./pages/Payment"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess")); 
+import ProductDetails from "./pages/ProductDetails";
 
 // Dashboards
 const AdminDashboard = lazy(() => import("./dashboards/AdminDashboard"));
@@ -93,6 +94,7 @@ function App() {
           <Route path="/customer-segmentation" element={<CustomerSegmentation />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
           <Route path="/superadmindashboard" element={<SuperAdminDashboard />} /> 
+          <Route path="product/:id" element={<ProductDetails />} />
           
           <Route path="/upload" element={<Upload/>}/>
         </Route>

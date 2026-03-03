@@ -18,11 +18,11 @@ function FinancialInsights() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleRevenue = async (steps) => {
+    const handleRevenue = async (months) => {
         try {
             setLoading(true);
             setError("");
-            const response = await getRevenueForecast(steps);
+            const response = await getRevenueForecast(months);
             setForecastData(response.data.forecast);
             setTitle("Revenue Forecast");
         } catch {
@@ -32,11 +32,11 @@ function FinancialInsights() {
         }
     };
 
-    const handleSales = async (steps) => {
+    const handleSales = async (months) => {
         try {
             setLoading(true);
             setError("");
-            const response = await getSalesForecast(steps);
+            const response = await getSalesForecast(months);
             setForecastData(response.data.forecast);
             setTitle("Sales Forecast");
         } catch {
@@ -46,7 +46,9 @@ function FinancialInsights() {
         }
     };
 
-    // KPI Calculations
+    /* ===============================
+       KPI Calculations (Original Data)
+    ================================ */
     const { total, avg, max, growth } = useMemo(() => {
         const total = forecastData.reduce((a, b) => a + b, 0);
         const avg = forecastData.length ? total / forecastData.length : 0;
@@ -63,7 +65,48 @@ function FinancialInsights() {
         return { total, avg, max, growth };
     }, [forecastData]);
 
-    // Animated Counter
+    /* ==========================================
+       🔥 SMART AGGREGATION LOGIC (Production)
+    =========================================== */
+    const { chartData, viewType } = useMemo(() => {
+        const length = forecastData.length;
+
+        if (length < 12) {
+            return { chartData: forecastData, viewType: "Monthly" };
+        }
+
+        // Quarterly View (12–23 months)
+        if (length >= 12 && length < 24) {
+            const quarterly = [];
+            for (let i = 0; i < length; i += 3) {
+                const quarterSlice = forecastData.slice(i, i + 3);
+                const avgQuarter =
+                    quarterSlice.reduce((a, b) => a + b, 0) /
+                    quarterSlice.length;
+                quarterly.push(Math.round(avgQuarter));
+            }
+            return { chartData: quarterly, viewType: "Quarterly" };
+        }
+
+        // Yearly View (24+ months)
+        if (length >= 24) {
+            const yearly = [];
+            for (let i = 0; i < length; i += 12) {
+                const yearSlice = forecastData.slice(i, i + 12);
+                const avgYear =
+                    yearSlice.reduce((a, b) => a + b, 0) /
+                    yearSlice.length;
+                yearly.push(Math.round(avgYear));
+            }
+            return { chartData: yearly, viewType: "Yearly" };
+        }
+
+        return { chartData: forecastData, viewType: "Monthly" };
+    }, [forecastData]);
+
+    /* ===============================
+       Animated Counter
+    ================================ */
     const AnimatedNumber = ({ value }) => {
         const [display, setDisplay] = useState(0);
 
@@ -91,10 +134,6 @@ function FinancialInsights() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8 text-white relative overflow-hidden">
 
-            {/* Background Glow */}
-            <div className="absolute top-0 left-0 w-96 h-96 bg-violet-600/20 blur-[120px] rounded-full"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-500/20 blur-[120px] rounded-full"></div>
-
             <div className="max-w-7xl mx-auto relative z-10">
 
                 {/* Header */}
@@ -111,7 +150,7 @@ function FinancialInsights() {
                     </p>
                 </motion.div>
 
-                {/* Control Panel */}
+                {/* Controls */}
                 <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl mb-10">
                     <ControlPanel
                         onRevenue={handleRevenue}
@@ -158,7 +197,7 @@ function FinancialInsights() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.2 }}
                                     whileHover={{ scale: 1.04 }}
-                                    className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-violet-500/20 transition"
+                                    className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl"
                                 >
                                     <div className="flex justify-between items-center">
                                         <div>
@@ -175,7 +214,7 @@ function FinancialInsights() {
                             ))}
                         </div>
 
-                        {/* Growth Indicator */}
+                        {/* Growth */}
                         <div className="mb-8 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-5 flex items-center justify-between">
                             <div>
                                 <h4 className="text-slate-400 text-sm">
@@ -201,39 +240,34 @@ function FinancialInsights() {
                                 </h3>
                             </div>
                             <p className="text-slate-300 text-sm">
-                                Based on the forecasted trend, revenue is expected to{" "}
+                                The forecast is displayed in{" "}
+                                <span className="text-white font-semibold">
+                                    {viewType}
+                                </span>{" "}
+                                view. Based on projected patterns, financial
+                                performance is expected to{" "}
                                 <span className="text-white font-semibold">
                                     {growth >= 0 ? "increase" : "decline"}
                                 </span>{" "}
-                                over the next {forecastData.length} periods.
-                                Strategic inventory and marketing adjustments
-                                are recommended to optimize performance.
+                                over the selected time horizon.
                             </p>
                         </div>
 
                         {/* Chart */}
                         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 shadow-2xl">
                             <ForecastChart
-                                data={forecastData}
-                                title={`${title} (Next ${forecastData.length} Periods)`}
+                                data={chartData}
+                                title={`${title} (${viewType} View)`}
                             />
                         </div>
 
                         {/* Disclaimer */}
-                        <div className="mt-6 text-xs text-amber-300 bg-amber-500/10 border border-amber-400/20 rounded-lg p-4">
-                            ⚠ Disclaimer: The forecast results are generated using AI-based
-                            predictive models and historical data patterns. These projections
-                            are estimates only and should not be considered guaranteed
-                            financial outcomes. Actual results may vary due to market
-                            conditions, operational changes, and external factors.
+                        <div className="mt-6 text-xs text-amber-300 bg-amber-500/10 border border-amber-400/20 rounded-lg p-4"> 
+                        ⚠ Disclaimer: The forecast results are generated using AI-based predictive models and historical data patterns.
+                        These projections are estimates only and should not be considered guaranteed financial outcomes.
+                        Actual results may vary due to market conditions, operational changes, and external factors.
                         </div>
                     </>
-                )}
-
-                {!loading && forecastData.length === 0 && (
-                    <div className="text-center text-slate-500 mt-20 text-lg">
-                        Run a forecast to generate predictive insights 📊
-                    </div>
                 )}
             </div>
         </div>
