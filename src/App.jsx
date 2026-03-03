@@ -9,6 +9,8 @@ import { setProfile, logout } from './slices/userSlice';
 import BouncingLoader from "./pages/BouncingLoader";
 import MainLayout from "./components/ui/MainLayout";
 import { Upload } from "lucide-react";
+import MLPredict from "./pages/MLPredict.jsx";
+import ReturnPredictor from "./pages/ReturnPredictor.jsx";
 
 // Lazy Imports
 const Home = lazy(() => import("./pages/Home"));
@@ -24,6 +26,7 @@ const Shipping = lazy(() => import("./pages/Shipping"));
 const Payment = lazy(() => import("./pages/Payment"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess")); 
 import ProductDetails from "./pages/ProductDetails";
+import CancelPredictor from "./pages/CancelPredictor.jsx";
 
 // Dashboards
 const AdminDashboard = lazy(() => import("./dashboards/AdminDashboard"));
@@ -82,6 +85,9 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/search" element={<Search />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/ml-predict" element={<MLPredict />} />
+          <Route path="/pre" element={<ReturnPredictor />} />
+          <Route path="/can" element={<CancelPredictor />} />
           <Route path="/financial-insights" element={<FinancialInsights />} />
           
           {/* --- Checkout Routes --- */}
@@ -93,7 +99,7 @@ function App() {
           <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/customer-segmentation" element={<CustomerSegmentation />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
-          <Route path="/superadmindashboard" element={<SuperAdminDashboard />} /> 
+          <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
           <Route path="product/:id" element={<ProductDetails />} />
           
           <Route path="/upload" element={<Upload/>}/>

@@ -11,7 +11,7 @@ import {
   where
 } from "firebase/firestore";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, CheckCircle, Info, Loader, Ticket, Trash2, Truck, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, Loader, Mic, Ticket, Trash2, Truck, X } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import {
@@ -26,6 +26,7 @@ import {
 } from 'react-icons/fa';
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import VoiceAssistant from "../../components/VoiceAssistant.jsx";
 import { auth, db } from '../../firebase';
 import { clearCart, setCart } from "../../slices/cartSlice";
 
@@ -135,6 +136,7 @@ const NavbarNotifications = ({ user, isAdmin, isSuperAdmin, onUpdateData }) => {
     return { bg: 'bg-slate-800', border: 'border-l-slate-500', text: 'text-slate-300', icon: <Info size={18} className="text-slate-400" />, title: 'Notification' };
   };
 
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button onClick={() => setIsOpen(!isOpen)} className="relative p-2 text-slate-300 hover:text-white transition-colors">
@@ -222,6 +224,7 @@ const Navbar = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -390,6 +393,14 @@ const Navbar = () => {
               <button className="md:hidden text-slate-300 p-1" onClick={() => setShowMobileSearch(!showMobileSearch)}>
                 {showMobileSearch ? <X size={20} /> : <FaSearch size={20} />}
               </button>
+              {/* 🎤 Voice Assistant Button */}
+              <button
+                onClick={() => setShowVoiceModal(true)}
+                className="text-slate-300 hover:text-blue-400 transition-colors p-1"
+                title="Voice Assistant"
+              >
+                <Mic size={20} />
+              </button>
 
               {isAuth && currentUser && (
                 <NavbarNotifications user={currentUser} isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />
@@ -498,6 +509,15 @@ const Navbar = () => {
           <span className="text-[10px] font-medium">Cart</span>
         </Link>
 
+        {/* 🎤 Voice */}
+        {/* <button
+          onClick={() => setShowVoiceModal(true)}
+          className="flex flex-col items-center gap-1 w-16 text-slate-500 hover:text-blue-400"
+        >
+          🎤
+          <span className="text-[10px] font-medium">Voice</span>
+        </button> */}
+
         {/* 4. Contact (Replaced Profile) */}
         <Link
           to="/contact"
@@ -516,7 +536,16 @@ const Navbar = () => {
           </Link>
         )}
       </div>
+      {/* 🎤 Voice Assistant Modal */}
+      <VoiceAssistant
+        isOpen={showVoiceModal}
+        onClose={() => setShowVoiceModal(false)}
+        isAdmin={isAdmin}
+        isSuperAdmin={isSuperAdmin}
+      />
+
     </>
+
   );
 };
 
