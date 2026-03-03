@@ -1,18 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
-  doc, getDoc, collection, query, where, onSnapshot, deleteDoc, updateDoc, addDoc, serverTimestamp
+  addDoc,
+  collection,
+  deleteDoc,
+  doc, getDoc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where
 } from "firebase/firestore";
-import { auth, db } from '../../firebase';
-import {
-  FaUser, FaSearch, FaShoppingCart, FaHome, FaThLarge, FaUserCircle, FaSignOutAlt, FaBell, FaPhone
-} from 'react-icons/fa';
-import { clearCart, setCart } from "../../slices/cartSlice";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle, CheckCircle, Info, Loader, Ticket, Trash2, Truck, X } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
-import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, Ticket, Package, Info, X, Loader, CheckCircle, Truck, AlertTriangle, Trash2 } from 'lucide-react';
+import {
+  FaBell,
+  FaHome,
+  FaPhone,
+  FaSearch, FaShoppingCart,
+  FaSignOutAlt,
+  FaThLarge,
+  FaUser,
+  FaUserCircle
+} from 'react-icons/fa';
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { auth, db } from '../../firebase';
+import { clearCart, setCart } from "../../slices/cartSlice";
 
 // --- Notifications Component (Best Mobile Version) ---
 const NavbarNotifications = ({ user, isAdmin, isSuperAdmin, onUpdateData }) => {
