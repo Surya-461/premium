@@ -514,23 +514,23 @@ const UserDashboard = () => {
         {activeTab === 'profile' && <ProfileTab displayData={displayData} handleProfileSave={handleProfileSave} isEditing={isEditingProfile} setIsEditing={setIsEditingProfile} editData={editFormData} setEditData={setEditFormData} />}
 
         {returnModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                <div className="bg-slate-900 border border-slate-700 w-full max-w-xs rounded-xl p-5 shadow-2xl">
-                    <h3 className="text-lg font-bold text-white mb-3">Return Item</h3>
-                    <div className="space-y-2 mb-4">
-                        {['Wrong Size', 'Damaged', 'Changed Mind', 'Other'].map(r => (
-                            <label key={r} className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${returnReason === r ? 'bg-violet-600/20 border-violet-500' : 'bg-slate-800 border-slate-700'}`}>
-                                <input type="radio" value={r} checked={returnReason === r} onChange={e => setReturnReason(e.target.value)} className="accent-violet-500"/>
-                                <span className="text-xs text-white">{r}</span>
-                            </label>
-                        ))}
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={() => setReturnModalOpen(false)} className="flex-1 py-1.5 bg-slate-800 rounded text-xs text-slate-300">Cancel</button>
-                        <button onClick={handleReturnSubmit} className="flex-1 py-1.5 bg-rose-600 text-white rounded text-xs font-bold">Submit</button>
-                    </div>
-                </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="bg-slate-900 border border-slate-700 w-full max-w-xs rounded-xl p-5 shadow-2xl">
+              <h3 className="text-lg font-bold text-white mb-3">Return Item</h3>
+              <div className="space-y-2 mb-4">
+                {['Wrong Size', 'Damaged', 'Changed Mind', 'Other'].map(r => (
+                  <label key={r} className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${returnReason === r ? 'bg-violet-600/20 border-violet-500' : 'bg-slate-800 border-slate-700'}`}>
+                    <input type="radio" value={r} checked={returnReason === r} onChange={e => setReturnReason(e.target.value)} className="accent-violet-500" />
+                    <span className="text-xs text-white">{r}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setReturnModalOpen(false)} className="flex-1 py-1.5 bg-slate-800 rounded text-xs text-slate-300">Cancel</button>
+                <button onClick={handleReturnSubmit} className="flex-1 py-1.5 bg-rose-600 text-white rounded text-xs font-bold">Submit</button>
+              </div>
             </div>
+          </div>
         )}
       </div>
     </div>
