@@ -21,7 +21,7 @@
     "emailjs-com": "^3.2.0",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.0",
-    "framer-motion": "^12.34.3",
+    "framer-motion": "^12.34.5",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
@@ -31,9 +31,11 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.11.0",
     "react-toastify": "^11.0.5",
+    "react-tsparticles": "^2.12.2",
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
-    "sweetalert2": "^11.26.17"
+    "sweetalert2": "^11.26.17",
+    "tsparticles": "^3.9.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
