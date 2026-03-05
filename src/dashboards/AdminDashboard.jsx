@@ -13,6 +13,7 @@ import {
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import {
   AlertTriangle,
+  BarChart3,
   Camera,
   Crown,
   FileText,
@@ -20,7 +21,6 @@ import {
   Loader,
   MapPin,
   Package,
-  PieChart,
   Search,
   Settings,
   ShoppingBag,
@@ -28,7 +28,7 @@ import {
   Trophy,
   User,
   Users,
-  X // Removed Menu icon
+  X
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
@@ -43,7 +43,7 @@ import {
   orders as initialStaticOrders
 } from "../data/dataUtils.js";
 
-import CustomerSegmentation from "../components/CustomerSegmentation.jsx";
+import FinancialInsights from "../components/FinancialInsights.jsx";
 import AdminCustomers from './AdminCustomers';
 import AdminOrders from './AdminOrders';
 import AdminProducts from './AdminProducts';
@@ -501,7 +501,7 @@ const AdminDashboard = () => {
     { id: 'products', icon: Package, label: 'Products' },
     { id: 'customers', icon: Users, label: 'Customers' },
     // ✅ NEW ITEM ADDED HERE
-    { id: 'segmentation', icon: PieChart, label: 'Customer Intelligence' },
+    { id: 'financial', icon: BarChart3, label: 'Financial Insights' },
     { id: 'reports', icon: FileText, label: 'Reports' },
     { id: 'coupons', icon: Ticket, label: 'Coupons' },
     { id: 'settings', icon: Settings, label: 'Settings' }
@@ -796,7 +796,7 @@ const AdminDashboard = () => {
             {activeSection === 'customers' && <AdminCustomers initialCustomers={customers} orders={orders} onUpdate={fetchAllData} />}
             {/* {activeSection === 'analytics' && <AdminAnalytics orders={filteredOrders} />} */}
             {/* {activeSection === 'segmentation' && <AdminSegmentation customers={customers} orders={orders} />} */}
-            {activeSection === 'segmentation' && <CustomerSegmentation customers={customers} orders={orders} />}
+            {activeSection === 'financial' && <FinancialInsights />}
             {activeSection === 'reports' && <AdminReports orders={filteredOrders} products={products} customers={customers} />}
             {activeSection === 'settings' && <AdminSettings />}
 
