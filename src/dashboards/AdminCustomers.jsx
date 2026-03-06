@@ -11,13 +11,15 @@ import {
 } from 'chart.js';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { Calendar, CheckCircle, ChevronLeft, ChevronRight, Filter, Loader, Mail, MapPin, Plus, Search, ShieldCheck, User, X, XCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Filter, Loader, Mail, MapPin, Plus, Search, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { auth, db } from "../firebase";
 
 import { caddress } from "../data/dataUtils";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, Filler);
+// segmentationData = your JSON file with customer_id and segment
+import segmentationData from "../data/final_df_cleaned.json";
 
 const THEME = {
     bg: '#041528',
@@ -34,6 +36,26 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    // segmentation & metrics lookup from the imported JSON
+    const segmentationMap = useMemo(() => {
+        const map = {};
+        segmentationData.forEach(item => {
+            // item may have keys like Customer_segment_label, Total_Spending, num_of_orders etc.
+            const id = item.customer_id || item.customer_id?.toString();
+            if (id == null) return;
+            // derive simple segment tag for styling
+            let normalized = 'low';
+            const label = (item.Customer_segment_label || '').toString().toLowerCase();
+            if (label.includes('high')) normalized = 'high';
+            else if (label.includes('medium')) normalized = 'medium';
+            map[id] = {
+                segment: normalized,
+                raw: item // keep full record for KPIs
+            };
+        });
+        return map;
+    }, []);
+
     // --- PAGINATION ---
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -42,6 +64,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
     const [filterYear, setFilterYear] = useState('');
     const [filterMonth, setFilterMonth] = useState('');
     const [filterDay, setFilterDay] = useState('');
+    const [sortBy, setSortBy] = useState('name'); // name, spending, orders
 
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '', password: '',
@@ -129,7 +152,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
     // ==================================================================================
     // 3. KPI & CHART CALCULATIONS (Driven by Filtered Data)
     // ==================================================================================
-    const { kpis, chartData } = useMemo(() => {
+    const { kpis } = useMemo(() => {
 
         // KPI: Total Customers (Joined in selected period)
         const totalCustomers = filteredNewCustomers.length;
@@ -194,11 +217,28 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
     // ==================================================================================
     const displayedCustomers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
-        const list = allMergedCustomers.filter(c =>
+        let list = allMergedCustomers.filter(c =>
             (c.customer_full_name && c.customer_full_name.toLowerCase().includes(lowerSearch)) ||
             (c.customer_email && c.customer_email.toLowerCase().includes(lowerSearch)) ||
             (c.customer_id && String(c.customer_id).toLowerCase().includes(lowerSearch))
         );
+
+        // Apply sorting
+        if (sortBy === 'spending') {
+            list.sort((a, b) => {
+                const aSpend = segmentationMap[a.customer_id]?.raw?.Total_Spending || 0;
+                const bSpend = segmentationMap[b.customer_id]?.raw?.Total_Spending || 0;
+                return bSpend - aSpend;
+            });
+        } else if (sortBy === 'orders') {
+            list.sort((a, b) => {
+                const aOrders = segmentationMap[a.customer_id]?.raw?.num_of_orders || 0;
+                const bOrders = segmentationMap[b.customer_id]?.raw?.num_of_orders || 0;
+                return bOrders - aOrders;
+            });
+        } else {
+            list.sort((a, b) => (a.customer_full_name || '').localeCompare(b.customer_full_name || ''));
+        }
 
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -207,7 +247,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
             data: list.slice(startIndex, endIndex),
             total: list.length
         };
-    }, [allMergedCustomers, searchTerm, currentPage]);
+    }, [allMergedCustomers, searchTerm, currentPage, sortBy, segmentationMap]);
 
     const totalPages = Math.ceil(displayedCustomers.total / itemsPerPage);
 
@@ -281,6 +321,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
                 ].map((item, idx) => (
                     <div key={idx} className="p-6 rounded-3xl shadow-lg border text-center relative overflow-hidden group" style={{ backgroundColor: THEME.card, borderColor: THEME.border }}>
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-50"></div>
+                        <div className="absolute top-2 right-2 text-[8px] font-bold px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 uppercase tracking-wider">AI Predicted</div>
                         <h3 className="text-3xl font-bold mb-1 transition-transform group-hover:scale-110" style={{ color: THEME.textMain }}>{item.val}</h3>
                         <p className="text-sm font-medium uppercase tracking-wide" style={{ color: THEME.textSub }}>{item.label}</p>
                         <p className="text-[10px] mt-1 opacity-60" style={{ color: THEME.textSub }}>{item.sub}</p>
@@ -309,77 +350,187 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
       </div> */}
 
             {/* CUSTOMER LIST */}
-            <div className="flex items-center justify-between mt-6 px-2">
+            <div className="flex items-center justify-between mt-6 px-2 flex-wrap gap-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     All Customers <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs font-normal">{displayedCustomers.total}</span>
                 </h3>
-                <div className="flex gap-2">
-                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 transition-colors text-white"><ChevronLeft size={16} /></button>
-                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 transition-colors text-white"><ChevronRight size={16} /></button>
+                <div className="flex gap-2 items-center">
+                    <select value={sortBy} onChange={e => { setSortBy(e.target.value); setCurrentPage(1); }} className="px-3 py-2 rounded-lg text-xs font-medium outline-none border cursor-pointer" style={{ backgroundColor: THEME.bg, borderColor: THEME.border, color: THEME.textMain }}>
+                        <option value="name">Sort by: Name</option>
+                        <option value="spending">Sort by: Total Spend</option>
+                        <option value="orders">Sort by: Orders</option>
+                    </select>
+                    <div className="flex gap-2">
+                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 transition-colors text-white"><ChevronLeft size={16} /></button>
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 transition-colors text-white"><ChevronRight size={16} /></button>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[400px]">
-                {displayedCustomers.data.map((c) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
+                {displayedCustomers.data.map((c) => {
+                    const metricsEntry = segmentationMap[c.customer_id] || { segment: 'low', raw: {} };
+                    const segment = metricsEntry.segment || "low";
+                    const customerJson = metricsEntry.raw || {};
                     // --- UPDATED CARD CONTAINER: h-full allows cards to stretch equally ---
-                    <div key={c.customer_id} className="p-5 rounded-3xl border shadow-lg flex flex-col gap-4 relative group hover:-translate-y-1 transition-all duration-300 h-full" style={{ backgroundColor: THEME.card, borderColor: THEME.border }}>
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-3 flex-1 min-w-0"> {/* min-w-0 allows truncation in flex child */}
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold overflow-hidden shrink-0 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: THEME.border, color: THEME.cyan }}>
-                                    {c.customer_image_url ? <img src={c.customer_image_url} className="w-full h-full object-cover" alt="user" /> : (c.customer_full_name?.[0] || 'U')}
+                    return (
+                        <div key={c.customer_id} className="p-6 rounded-3xl border shadow-lg flex flex-col gap-3 relative group hover:-translate-y-2 transition-all duration-300 h-full" style={{ backgroundColor: THEME.card, borderColor: THEME.border }}>
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-center gap-3 flex-1 min-w-0"> {/* min-w-0 allows truncation in flex child */}
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold overflow-hidden shrink-0 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: THEME.border, color: THEME.cyan }}>
+                                        {c.customer_image_url ? <img src={c.customer_image_url} className="w-full h-full object-cover" alt="user" /> : (c.customer_full_name?.[0] || 'U')}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="font-bold text-base truncate" title={c.customer_full_name} style={{ color: THEME.textMain }}>{c.customer_full_name}</div>
+                                        <div className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: THEME.textSub }}>ID: {c.customer_id}</div>
+                                    </div>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="font-bold text-base truncate" title={c.customer_full_name} style={{ color: THEME.textMain }}>{c.customer_full_name}</div>
-                                    <div className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: THEME.textSub }}>ID: {c.customer_id}</div>
+                                {/* Fixed width for badges so they don't jump around */}
+                                <div className="flex flex-col items-end gap-1 shrink-0">
+
+                                    <div className="flex items-center gap-1">
+                                        <span
+                                            className={`px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center
+${segment === "high" ? "bg-red-500/10 border-red-500/30 text-red-400" :
+                                                    segment === "medium" ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-400" :
+                                                        "bg-blue-500/10 border-blue-500/30 text-blue-400"}`}
+                                        >
+                                            {segment === "high" ? "High" : segment === "medium" ? "Medium" : "Low"}
+                                        </span>
+                                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold border bg-purple-500/10 border-purple-500/30 text-purple-400 uppercase tracking-wider">
+                                            AI
+                                        </span>
+                                    </div>
+
+                                    {/* {c.customer_is_active ?
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center bg-green-500/10 border-green-500/30 text-green-400">
+                                            <CheckCircle size={10} /> Active
+                                        </span> :
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center bg-rose-500/10 border-rose-500/30 text-rose-400">
+                                            <XCircle size={10} /> Inactive
+                                        </span>
+                                    } */}
+
                                 </div>
                             </div>
-                            {/* Fixed width for badges so they don't jump around */}
-                            <div className="flex flex-col items-end gap-1 shrink-0">
-                                {c.type === 'User' ?
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}><ShieldCheck size={10} /> Reg</span> :
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center" style={{ backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: THEME.border, color: THEME.textSub }}><User size={10} /> Man</span>
-                                }
-                                {c.customer_is_active ?
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center bg-green-500/10 border-green-500/30 text-green-400"><CheckCircle size={10} /> Active</span> :
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] border flex gap-1 items-center bg-rose-500/10 border-rose-500/30 text-rose-400"><XCircle size={10} /> Inactive</span>
-                                }
-                            </div>
-                        </div>
 
-                        <div className="w-full h-px bg-white/5"></div>
+                            <div className="w-full h-px bg-white/5"></div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm" style={{ color: THEME.textSub }}>
-                                <Mail size={14} className="text-blue-500 shrink-0" /> <span className="truncate" title={c.customer_email}>{c.customer_email}</span>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-sm" style={{ color: THEME.textSub }}>
+                                    <Mail size={14} className="text-blue-500 shrink-0" /> <span className="truncate" title={c.customer_email}>{c.customer_email}</span>
+                                </div>
+                                <div className="flex items-start gap-2 text-sm" style={{ color: THEME.textSub }}>
+                                    <MapPin size={14} className="text-cyan-500 mt-1 shrink-0" />
+                                    <span className="line-clamp-2 text-xs leading-relaxed" title={c.address_line || `${c.customer_city}, ${c.customer_country}`}>
+                                        {c.address_line ? (
+                                            <span className="text-white font-medium">{c.address_line},<br />{c.customer_city}, {c.customer_state}</span>
+                                        ) : (
+                                            <>{c.customer_city || 'Unknown'}, {c.customer_country}</>
+                                        )}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex items-start gap-2 text-sm" style={{ color: THEME.textSub }}>
-                                <MapPin size={14} className="text-cyan-500 mt-1 shrink-0" />
-                                <span className="line-clamp-2 text-xs leading-relaxed" title={c.address_line || `${c.customer_city}, ${c.customer_country}`}>
-                                    {c.address_line ? (
-                                        <span className="text-white font-medium">{c.address_line},<br />{c.customer_city}, {c.customer_state}</span>
-                                    ) : (
-                                        <>{c.customer_city || 'Unknown'}, {c.customer_country}</>
-                                    )}
-                                </span>
-                            </div>
-                        </div>
 
-                        {/* mt-auto pushes this footer to the bottom of the card */}
-                        <div className="mt-auto pt-3 border-t flex justify-between items-center text-xs" style={{ borderColor: 'rgba(255,255,255,0.05)', color: THEME.textSub }}>
-                            <span>Joined:</span>
-                            <div className="flex items-center gap-1 font-medium text-white"><Calendar size={12} /> {c.customer_created_date?.substring(0, 10) || 'N/A'}</div>
+                            {/* mt-auto pushes this footer to the bottom of the card */}
+                            <div className="mt-auto pt-3 border-t flex justify-between items-center text-xs" style={{ borderColor: 'rgba(255,255,255,0.05)', color: THEME.textSub }}>
+                                <span>Joined:</span>
+                                <div className="flex items-center gap-1 font-medium text-white"><Calendar size={12} /> {c.customer_created_date?.substring(0, 10) || 'N/A'}</div>
+                            </div>
+
+                            {/* display raw metrics from JSON if available */}
+                            {customerJson && Object.keys(customerJson).length > 0 && (
+                                <div className="mt-3 pt-3 border-t space-y-2 text-[11px]" style={{ borderColor: 'rgba(255,255,255,0.05)', color: THEME.textSub }}>
+                                    {customerJson.Total_Spending != null && <div className="flex justify-between"><span>Total Spend:</span> <span className="text-white font-medium">₹{customerJson.Total_Spending.toLocaleString()}</span></div>}
+                                    {customerJson.num_of_orders != null && <div className="flex justify-between"><span>Orders:</span> <span className="text-white font-medium">{customerJson.num_of_orders}</span></div>}
+                                    {customerJson.Average_Order_Value != null && <div className="flex justify-between"><span>Avg Order:</span> <span className="text-white font-medium">₹{customerJson.Average_Order_Value.toFixed(2)}</span></div>}
+                                </div>
+                            )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {displayedCustomers.data.length === 0 && (
                     <div className="col-span-full flex flex-col items-center justify-center text-slate-500 py-10"><p>No customers found matching search.</p></div>
                 )}
             </div>
 
-            {/* Pagination Footer */}
+            {/* Enhanced Pagination Footer */}
             {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                    <span className="text-xs text-slate-500">Page {currentPage} of {totalPages}</span>
+                <div className="flex flex-col items-center justify-center gap-4 mt-8 py-6 rounded-3xl border" style={{ backgroundColor: THEME.card, borderColor: THEME.border }}>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className="px-3 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-30"
+                            style={{
+                                backgroundColor: currentPage === 1 ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                                borderColor: currentPage === 1 ? THEME.cyan : THEME.border,
+                                color: currentPage === 1 ? THEME.cyan : THEME.textSub,
+                            }}
+                        >
+                            First
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-30"
+                            style={{ borderColor: THEME.border, color: THEME.textSub }}
+                        >
+                            Prev
+                        </button>
+
+                        {/* Page number buttons */}
+                        <div className="flex gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let pageNum;
+                                if (totalPages <= 5) {
+                                    pageNum = i + 1;
+                                } else if (currentPage <= 3) {
+                                    pageNum = i + 1;
+                                } else if (currentPage >= totalPages - 2) {
+                                    pageNum = totalPages - 4 + i;
+                                } else {
+                                    pageNum = currentPage - 2 + i;
+                                }
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className="w-8 h-8 rounded-lg text-xs font-bold transition-all border"
+                                        style={{
+                                            backgroundColor: currentPage === pageNum ? THEME.blue : 'transparent',
+                                            borderColor: currentPage === pageNum ? THEME.blue : THEME.border,
+                                            color: currentPage === pageNum ? '#fff' : THEME.textSub,
+                                        }}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-30"
+                            style={{ borderColor: THEME.border, color: THEME.textSub }}
+                        >
+                            Next
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-30"
+                            style={{
+                                backgroundColor: currentPage === totalPages ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                                borderColor: currentPage === totalPages ? THEME.cyan : THEME.border,
+                                color: currentPage === totalPages ? THEME.cyan : THEME.textSub,
+                            }}
+                        >
+                            Last
+                        </button>
+                    </div>
+                    <span className="text-xs" style={{ color: THEME.textSub }}>Page {currentPage} of {totalPages}</span>
                 </div>
             )}
 

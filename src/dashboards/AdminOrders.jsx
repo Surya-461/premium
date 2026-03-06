@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import { predictOrderRisk } from "../utils/mlPrediction";
 
 // ─── Risk Badge Component ────────────────────────────────────────────────────
-const AdminOrders = ({ initialOrders, onUpdate }) => {
+const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isUpdating, setIsUpdating] = useState(null);
@@ -222,7 +222,8 @@ const AdminOrders = ({ initialOrders, onUpdate }) => {
                 <th className="p-5 font-semibold">Date</th>
                 <th className="p-5 font-semibold">Customer</th>
                 <th className="p-5 font-semibold">Status / Reason</th>
-
+                <th className="p-5 font-semibold text-center">Return Prediction</th>
+                <th className="p-5 font-semibold text-center">Cancel Prediction</th>
                 <th className="p-5 font-semibold text-right">Total</th>
                 <th className="p-5 font-semibold text-center">Action</th>
               </tr>
@@ -289,8 +290,41 @@ const AdminOrders = ({ initialOrders, onUpdate }) => {
                         </div>
                       </td>
 
+                      {/* Return Prediction */}
+                      <td className="p-5 text-center">
+                        <div className="flex items-center justify-center">
+                          {(() => {
+                            const cust = customers.find(c => c.customer_full_name === o.customer_id);
+                            const returnRate = cust?.customer_return_rate || 0;
+                            const returnColor = returnRate >= 0.7 ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                              returnRate >= 0.4 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
+                                'bg-green-500/10 border-green-500/30 text-green-400';
+                            return (
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${returnColor} inline-block`}>
+                                {returnRate.toFixed(2)}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      </td>
 
-
+                      {/* Cancel Prediction */}
+                      <td className="p-5 text-center">
+                        <div className="flex items-center justify-center">
+                          {(() => {
+                            const cust = customers.find(c => c.customer_full_name === o.customer_id);
+                            const cancelRate = cust?.customer_cancel_rate || 0;
+                            const cancelColor = cancelRate >= 0.7 ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                              cancelRate >= 0.4 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
+                                'bg-green-500/10 border-green-500/30 text-green-400';
+                            return (
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${cancelColor} inline-block`}>
+                                {cancelRate.toFixed(2)}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      </td>
 
 
                       {/* Total */}
