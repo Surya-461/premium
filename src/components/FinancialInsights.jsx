@@ -1,16 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
-    TrendingUp,
-    TrendingDown,
-    IndianRupee,
     BarChart3,
-    Sparkles
+    IndianRupee,
+    Sparkles,
+    TrendingDown,
+    TrendingUp
 } from "lucide-react";
 import { getRevenueForecast, getSalesForecast } from "../../services/api.js";
-import ForecastChart from "./ForecastChart.jsx";
 import ControlPanel from "./ControlPanel.jsx";
+import ForecastChart from "./ForecastChart.jsx";
 
 function FinancialInsights() {
     const [forecastData, setForecastData] = useState([]);
@@ -262,10 +262,10 @@ function FinancialInsights() {
                         </div>
 
                         {/* Disclaimer */}
-                        <div className="mt-6 text-xs text-amber-300 bg-amber-500/10 border border-amber-400/20 rounded-lg p-4"> 
-                        ⚠ Disclaimer: The forecast results are generated using AI-based predictive models and historical data patterns.
-                        These projections are estimates only and should not be considered guaranteed financial outcomes.
-                        Actual results may vary due to market conditions, operational changes, and external factors.
+                        <div className="mt-6 text-xs text-amber-300 bg-amber-500/10 border border-amber-400/20 rounded-lg p-4">
+                            ⚠ Disclaimer: The forecast results are generated using AI-based predictive models and historical data patterns.
+                            These projections are estimates only and should not be considered guaranteed financial outcomes.
+                            Actual results may vary due to market conditions, operational changes, and external factors.
                         </div>
                     </>
                 )}
