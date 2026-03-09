@@ -792,7 +792,7 @@ const AdminDashboard = () => {
             )}
 
             {activeSection === 'products' && <AdminProducts initialProducts={products} orders={orders} orderItems={initialOrderItems} payments={initialPayments} onUpdate={fetchAllData} />}
-            {activeSection === 'orders' && <AdminOrders initialOrders={orders} onUpdate={fetchAllData} onStatusChange={handleOrderStatusUpdate} />}
+            {activeSection === 'orders' && <AdminOrders initialOrders={orders} onUpdate={fetchAllData} customers={customers} onStatusChange={handleOrderStatusUpdate} />}
             {activeSection === 'customers' && <AdminCustomers initialCustomers={customers} orders={orders} onUpdate={fetchAllData} />}
             {/* {activeSection === 'analytics' && <AdminAnalytics orders={filteredOrders} />} */}
             {/* {activeSection === 'segmentation' && <AdminSegmentation customers={customers} orders={orders} />} */}

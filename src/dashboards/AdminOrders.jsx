@@ -4,7 +4,6 @@ import {
   Calendar,
   CheckCircle,
   ChevronDown,
-  ChevronLeft, ChevronRight,
   Filter, Loader2,
   MessageSquare,
   Package,
@@ -14,7 +13,6 @@ import {
 import React, { useMemo, useState } from 'react';
 import { db } from "../firebase";
 // prediction helper
-import { Link } from 'react-router-dom';
 import { getPrediction } from "../utils/getPrediction";
 import { predictOrderRisk } from "../utils/mlPrediction";
 
@@ -41,6 +39,18 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
     });
   }, [initialOrders]);
 
+  const customerMap = useMemo(() => {
+    const map = {};
+    customers.forEach(c => {
+      map[String(c.customer_id)] = c;
+    });
+    return map;
+  }, [customers]);
+
+  const getCustomer = (id) => {
+    return customerMap[String(id)];
+  };
+
   // when admin types an order ID into searchTerm, fetch prediction for first matching order
   React.useEffect(() => {
     const trimmed = searchTerm.trim();
@@ -66,18 +76,34 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
   // ── Filtering ──────────────────────────────────────────────────────────────
   const filteredOrders = useMemo(() => {
     return sortedOrders.filter(order => {
+
       const sTerm = searchTerm.toLowerCase();
       const idMatch = order.order_id?.toString().toLowerCase().includes(sTerm);
       const statusMatch = statusFilter === 'All' || order.order_status === statusFilter;
-      return idMatch && statusMatch;
+
+      const { returnRate, cancelRate } = getPrediction(order.customer_id);
+
+      // ❌ remove orders where both predictions are 0
+      const hasPrediction = !(returnRate === 0 && cancelRate === 0);
+
+      return idMatch && statusMatch && hasPrediction;
     });
   }, [sortedOrders, searchTerm, statusFilter]);
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
   // ── Pagination ─────────────────────────────────────────────────────────────
-  const indexOfLastItem = currentPage * itemsPerPage;
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage));
+
+  // make sure currentPage never exceeds totalPages
+  const safePage = Math.min(currentPage, totalPages);
+
+  const indexOfLastItem = safePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
   const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
   // ── Status Change ──────────────────────────────────────────────────────────
   const handleStatusChange = async (id, newStatus, isFirebase, customerId) => {
@@ -160,6 +186,9 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
     </div>
   );
 
+
+  // console.log("Customers data:", customers);
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 animate-fade-in px-2 sm:px-0 pb-10">
@@ -171,10 +200,10 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
             <Package className="text-violet-500" /> Order Management
           </h2>
           <p className="text-xs text-slate-400 mt-1">Manage, track and update customer orders.</p>
-          <Link to={"/pre"}><button className='text-slate-500 text-xs mt-2 hover:text-violet-400 transition'> <b>View Return Prediction</b></button></Link> <br></br>
+          {/* <Link to={"/pre"}><button className='text-slate-500 text-xs mt-2 hover:text-violet-400 transition'> <b>View Return Prediction</b></button></Link> <br></br> */}
 
 
-          <Link to={"/can"}><button className='text-slate-500 text-xs mt-2 hover:text-violet-400 transition'> <b>View Cancelled Orders</b></button></Link>
+          {/* <Link to={"/can"}><button className='text-slate-500 text-xs mt-2 hover:text-violet-400 transition'> <b>View Cancelled Orders</b></button></Link> */}
         </div>
 
 
@@ -214,7 +243,7 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
       </div>
 
       {/* ── DESKTOP TABLE ─────────────────────────────────────────────── */}
-      <div className="hidden sm:block bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="hidden sm:block bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl mb-12">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
@@ -223,8 +252,29 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                 <th className="p-5 font-semibold">Date</th>
                 <th className="p-5 font-semibold">Customer</th>
                 <th className="p-5 font-semibold">Status / Reason</th>
-                <th className="p-5 font-semibold text-center">Return Prediction</th>
-                <th className="p-5 font-semibold text-center">Cancel Prediction</th>
+                <th className="p-5 font-semibold text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    Return Prediction
+                    <span
+                      title="AI Generated Prediction"
+                      className="text-[9px] px-2 py-[1px] rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 border border-violet-400/30 text-violet-300 font-bold"
+                    >
+                      AI
+                    </span>
+                  </div>
+                </th>
+
+                <th className="p-5 font-semibold text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    Cancel Prediction
+                    <span
+                      title="AI Generated Prediction"
+                      className="text-[9px] px-2 py-[1px] rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 border border-violet-400/30 text-violet-300 font-bold"
+                    >
+                      AI
+                    </span>
+                  </div>
+                </th>
                 <th className="p-5 font-semibold text-right">Total</th>
                 <th className="p-5 font-semibold text-center">Action</th>
               </tr>
@@ -257,13 +307,29 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                       {/* Customer */}
                       <td className="p-5">
                         <div className="text-slate-300 text-sm flex items-center gap-3">
+
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-slate-600 shadow-sm">
                             <User size={14} className="text-slate-400" />
                           </div>
+
                           <div className="flex flex-col">
-                            <span className="truncate max-w-[120px] font-medium text-white" title={o.customer_id}>{o.customer_id}</span>
-                            <span className="text-[10px] text-slate-500">Customer</span>
+                            {(() => {
+                              const customer = getCustomer(o.customer_id);
+                              const name = customer
+                                ? `${customer.first_name} ${customer.last_name}`
+                                : `${o.customer_id}`;
+
+                              return (
+                                <span
+                                  className="truncate max-w-[160px] font-medium text-white"
+                                  title={name}
+                                >
+                                  {name}
+                                </span>
+                              );
+                            })()}
                           </div>
+
                         </div>
                       </td>
 
@@ -298,9 +364,18 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                             const { returnRate, returnColor } = getPrediction(o.customer_id);
 
                             return (
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${returnColor}`}>
-                                {returnRate.toFixed(2)}
-                              </span>
+                              <div className="flex items-center justify-center gap-1">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold border ${returnColor}`}>
+                                  {returnRate.toFixed(2)}
+                                </span>
+
+                                <span
+                                  title="AI Generated Prediction"
+                                  className="text-[9px] px-2 py-[1px] rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 border border-violet-400/30 text-violet-300 font-bold"
+                                >
+                                  AI
+                                </span>
+                              </div>
                             );
                           })()}
                         </div>
@@ -313,9 +388,18 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                             const { cancelRate, cancelColor } = getPrediction(o.customer_id);
 
                             return (
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${cancelColor}`}>
-                                {cancelRate.toFixed(2)}
-                              </span>
+                              <div className="flex items-center justify-center gap-1">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold border ${cancelColor}`}>
+                                  {cancelRate.toFixed(2)}
+                                </span>
+
+                                <span
+                                  title="AI Generated Prediction"
+                                  className="text-[9px] px-2 py-[1px] rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 border border-violet-400/30 text-violet-300 font-bold"
+                                >
+                                  AI
+                                </span>
+                              </div>
                             );
                           })()}
                         </div>
@@ -371,10 +455,18 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                   <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 shrink-0">
                     <User size={14} className="text-slate-400" />
                   </div>
-                  <div className="overflow-hidden">
-                    <p className="text-sm text-white font-medium truncate">{o.customer_id}</p>
-                    <p className="text-[10px] text-slate-500">Customer ID</p>
-                  </div>
+                  {(() => {
+                    const customer = getCustomer(o.customer_id);
+                    const name = customer
+                      ? `${customer.first_name} ${customer.last_name}`
+                      : `${o.customer_id}`;
+
+                    return (
+                      <p className="text-sm text-white font-medium truncate" title={name}>
+                        {name}
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 {o.order_status === 'Return Requested' && o.returnReason && (
@@ -404,28 +496,83 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
       </div>
 
       {/* ── PAGINATION ────────────────────────────────────────────────────── */}
+      {/* ── PAGINATION ────────────────────────────────────────────────────── */}
       {filteredOrders.length > itemsPerPage && (
-        <div className="flex justify-center items-center gap-4 mt-6 bg-slate-900/80 p-2 rounded-2xl w-fit mx-auto border border-slate-800 backdrop-blur-sm shadow-xl sticky bottom-4 z-20">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="p-2.5 rounded-xl bg-slate-800 text-white hover:bg-violet-600 disabled:opacity-30 disabled:hover:bg-slate-800 transition-all active:scale-95 border border-slate-700 hover:border-violet-500"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-widest px-2">
-            Page <span className="text-white text-sm">{currentPage}</span> / {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="p-2.5 rounded-xl bg-slate-800 text-white hover:bg-violet-600 disabled:opacity-30 disabled:hover:bg-slate-800 transition-all active:scale-95 border border-slate-700 hover:border-violet-500"
-          >
-            <ChevronRight size={18} />
-          </button>
+        <div className="flex flex-col items-center gap-4 mt-10 bg-slate-900/80 p-4 rounded-2xl w-fit mx-auto border border-slate-800 backdrop-blur-sm shadow-xl">
+
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+
+            {/* First */}
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={safePage === 1}
+              className="px-3 py-1.5 text-xs rounded-lg border border-slate-700 text-slate-400 disabled:opacity-40 hover:bg-slate-800"
+            >
+              First
+            </button>
+
+            {/* Prev */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-3 py-1.5 text-xs rounded-lg border border-slate-700 text-slate-400 disabled:opacity-40 hover:bg-slate-800"
+            >
+              Prev
+            </button>
+
+            {/* Page Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let page;
+
+              if (totalPages <= 5) {
+                page = i + 1;
+              }
+              else if (safePage <= 3) {
+                page = i + 1;
+              }
+              else if (safePage >= totalPages - 2) {
+                page = totalPages - 4 + i;
+              }
+              else {
+                page = safePage - 2 + i;
+              }
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 text-xs rounded-lg border ${safePage === page
+                    ? "bg-violet-600 text-white border-violet-600"
+                    : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                    }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            {/* Next */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-3 py-1.5 text-xs rounded-lg border border-slate-700 text-slate-400 disabled:opacity-40 hover:bg-slate-800"
+            >
+              Next
+            </button>
+
+            {/* Last */}
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={safePage === totalPages}
+              className="px-3 py-1.5 text-xs rounded-lg border border-slate-700 text-slate-400 disabled:opacity-40 hover:bg-slate-800"
+            >
+              Last
+            </button>
+
+          </div>
+
         </div>
       )}
-
     </div>
   );
 };
