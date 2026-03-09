@@ -15,6 +15,7 @@ import React, { useMemo, useState } from 'react';
 import { db } from "../firebase";
 // prediction helper
 import { Link } from 'react-router-dom';
+import { getPrediction } from "../utils/getPrediction";
 import { predictOrderRisk } from "../utils/mlPrediction";
 
 // ─── Risk Badge Component ────────────────────────────────────────────────────
@@ -294,13 +295,10 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                       <td className="p-5 text-center">
                         <div className="flex items-center justify-center">
                           {(() => {
-                            const cust = customers.find(c => c.customer_full_name === o.customer_id);
-                            const returnRate = cust?.customer_return_rate || 0;
-                            const returnColor = returnRate >= 0.7 ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                              returnRate >= 0.4 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
-                                'bg-green-500/10 border-green-500/30 text-green-400';
+                            const { returnRate, returnColor } = getPrediction(o.customer_id);
+
                             return (
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${returnColor} inline-block`}>
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${returnColor}`}>
                                 {returnRate.toFixed(2)}
                               </span>
                             );
@@ -312,13 +310,10 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
                       <td className="p-5 text-center">
                         <div className="flex items-center justify-center">
                           {(() => {
-                            const cust = customers.find(c => c.customer_full_name === o.customer_id);
-                            const cancelRate = cust?.customer_cancel_rate || 0;
-                            const cancelColor = cancelRate >= 0.7 ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                              cancelRate >= 0.4 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
-                                'bg-green-500/10 border-green-500/30 text-green-400';
+                            const { cancelRate, cancelColor } = getPrediction(o.customer_id);
+
                             return (
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${cancelColor} inline-block`}>
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${cancelColor}`}>
                                 {cancelRate.toFixed(2)}
                               </span>
                             );
