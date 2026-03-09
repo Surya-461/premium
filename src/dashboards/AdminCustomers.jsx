@@ -321,7 +321,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
                 ].map((item, idx) => (
                     <div key={idx} className="p-6 rounded-3xl shadow-lg border text-center relative overflow-hidden group" style={{ backgroundColor: THEME.card, borderColor: THEME.border }}>
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-50"></div>
-                        <div className="absolute top-2 right-2 text-[8px] font-bold px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 uppercase tracking-wider">AI Predicted</div>
+                        {/* <div className="absolute top-2 right-2 text-[8px] font-bold px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 uppercase tracking-wider">AI Predicted</div> */}
                         <h3 className="text-3xl font-bold mb-1 transition-transform group-hover:scale-110" style={{ color: THEME.textMain }}>{item.val}</h3>
                         <p className="text-sm font-medium uppercase tracking-wide" style={{ color: THEME.textSub }}>{item.label}</p>
                         <p className="text-[10px] mt-1 opacity-60" style={{ color: THEME.textSub }}>{item.sub}</p>
@@ -352,7 +352,7 @@ const AdminCustomers = ({ initialCustomers, orders = [], onUpdate }) => {
             {/* CUSTOMER LIST */}
             <div className="flex items-center justify-between mt-6 px-2 flex-wrap gap-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    All Customers <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs font-normal">{displayedCustomers.total}</span>
+                  All Customers  {/*  <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs font-normal">{displayedCustomers.total}</span> */}
                 </h3>
                 <div className="flex gap-2 items-center">
                     <select value={sortBy} onChange={e => { setSortBy(e.target.value); setCurrentPage(1); }} className="px-3 py-2 rounded-lg text-xs font-medium outline-none border cursor-pointer" style={{ backgroundColor: THEME.bg, borderColor: THEME.border, color: THEME.textMain }}>
