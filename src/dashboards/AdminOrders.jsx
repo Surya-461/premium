@@ -4,7 +4,7 @@ import {
   Calendar,
   CheckCircle,
   ChevronDown,
-  Filter, Loader2,
+  Loader2,
   MessageSquare,
   Package,
   Search,
@@ -222,7 +222,7 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
           </div>
 
           {/* Status filter */}
-          <div className="relative">
+          {/* <div className="relative">
             <select
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
@@ -238,7 +238,7 @@ const AdminOrders = ({ initialOrders, onUpdate, customers = [] }) => {
               <option value="Cancelled">Cancelled</option>
             </select>
             <Filter size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-          </div>
+          </div> */}
         </div>
       </div>
 
