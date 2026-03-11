@@ -26,7 +26,7 @@ ChartJS.register(
 
 function ForecastChart({ data, title }) {
 
-    const labels = data.map((_, index) => `Period ${index + 1}`);
+    const labels = data.map((_, index) => `Month ${index + 1}`);
 
     // 🔎 Find Peak & Lowest
     const maxValue = Math.max(...data);
